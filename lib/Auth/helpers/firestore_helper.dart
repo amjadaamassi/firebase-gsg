@@ -23,11 +23,11 @@ class FirestoreHelper {
     }
   }
 
-  getUserFromFirestore(String userId) async {
+  Future<UserModel> getUserFromFirestore(String userId) async {
     DocumentSnapshot documentSnapshot =
         await firebaseFirestore.collection('Users').doc(userId).get();
 
-    print(documentSnapshot.data());
+    return UserModel.fromMap(documentSnapshot.data());
   }
 
   Future<List<UserModel>> getAllUsersFromFirestore() async {
@@ -53,5 +53,12 @@ class FirestoreHelper {
     } on Exception catch (e) {
       // TODO
     }
+  }
+
+  updateProfile(UserModel userModel) async {
+    await firebaseFirestore
+        .collection('Users')
+        .doc(userModel.id)
+        .update(userModel.toMap());
   }
 }

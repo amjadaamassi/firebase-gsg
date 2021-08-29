@@ -5,9 +5,6 @@ import 'package:firebase_gsg/global_widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
-
-
 class RegisterPage extends StatelessWidget {
   static final routeName = 'register';
 
