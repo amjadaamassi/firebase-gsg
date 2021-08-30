@@ -1,58 +1,45 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_gsg/services/routes_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'Auth/providers/auth_provider.dart';
-import 'Auth/ui/auth_main_page.dart';
-import 'Auth/ui/login_page.dart';
-import 'Auth/ui/register_page.dart';
-import 'Auth/ui/reset_password_page.dart';
-import 'chats/home_page.dart';
-import 'chats/profile_page.dart';
-import 'chats/users_page.dart';
-import 'splach_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import './screens/chat_screen.dart';
+import './screens/auth_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider<AuthProvider>(
-      create: (context) => AuthProvider(),
-      child: MaterialApp(
-          routes: {
-            LoginPage.routeName: (context) => LoginPage(),
-            RegisterPage.routeName: (context) => RegisterPage(),
-            ResetPasswordPage.routeName: (context) => ResetPasswordPage(),
-            HomePage.routeName: (context) => HomePage(),
-            AuthMainPage.routeName: (context) => AuthMainPage(),
-            UsersPage.routeName: (context) => UsersPage(),
-            ProfilePage.routeName: (context) => ProfilePage(),
-          },
-          navigatorKey: RouteHelper.routeHelper.navKey,
-          home: FirebaseConfiguration())));
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
 }
 
-class FirebaseConfiguration extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return FutureBuilder<FirebaseApp>(
-        future: Firebase.initializeApp(),
-        builder: (context, AsyncSnapshot<FirebaseApp> dataSnapShot) {
-          if (dataSnapShot.hasError) {
-            return Scaffold(
-              backgroundColor: Colors.red,
-              body: Center(
-                child: Text(dataSnapShot.error.toString()),
-              ),
-            );
+    return MaterialApp(
+      title: 'Chat app',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+        backgroundColor: Colors.red,
+        accentColor: Colors.redAccent,
+        accentColorBrightness: Brightness.dark,
+        buttonTheme: ButtonTheme.of(context).copyWith(
+          buttonColor: Colors.red,
+          textTheme: ButtonTextTheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.onAuthStateChanged,
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
+            return SplashScreen();
           }
-          if (dataSnapShot.connectionState == ConnectionState.done) {
-            return SplachScreen();
+          if (userSnapshot.hasData) {
+            return ChatScreen();
           }
-          return Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        });
+          return AuthScreen();
+        },
+      ),
+    );
   }
 }
